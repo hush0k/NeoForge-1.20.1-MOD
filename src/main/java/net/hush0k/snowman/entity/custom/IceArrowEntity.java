@@ -5,7 +5,6 @@ import net.hush0k.snowman.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +16,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -25,10 +23,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class IceArrowEntity extends AbstractArrow {
-    private int spiralStep = 0;
+    private final List<Vec3> trailPositions = new ArrayList<>();
     private int tickCounter = 0;
 
     public IceArrowEntity(EntityType<? extends IceArrowEntity> entityType, Level level) {
@@ -46,14 +45,29 @@ public class IceArrowEntity extends AbstractArrow {
         if (!level().isClientSide) {
             tickCounter++;
 
-            // Урон мобам в радиусе во время полёта
-            damageNearbyEntities();
+            // Сохраняем текущую позицию в список
+            trailPositions.add(this.position());
 
-            // Ледяной след каждый тик
-            createIceTrail();
+            // Создаём лёд из старых позиций (с задержкой 5 тиков)
+            if (trailPositions.size() > 5) {
+                Vec3 oldPos = trailPositions.remove(0);
+                createIceAtPosition(oldPos);
+            }
+
+            // Урон мобам в радиусе
+            damageNearbyEntities();
 
             // Частицы снега
             spawnSnowParticles();
+        }
+    }
+
+    private void createIceAtPosition(Vec3 pos) {
+        BlockPos icePos = new BlockPos((int)pos.x, (int)pos.y, (int)pos.z);
+        BlockState state = level().getBlockState(icePos);
+
+        if (state.isAir() || state.is(Blocks.WATER)) {
+            level().setBlock(icePos, Blocks.ICE.defaultBlockState(), 2);
         }
     }
 
@@ -84,34 +98,6 @@ public class IceArrowEntity extends AbstractArrow {
                 }
             }
         }
-    }
-
-    private void createIceTrail() {
-        Vec3 pos = this.position();
-        BlockPos basePos = new BlockPos((int)pos.x, (int)pos.y, (int)pos.z);
-
-        // Спираль по часовой стрелке: ЛВ → ПВ → ПН → ЛН
-        int[][] offsets = {
-                {-1, 0, -1, 0},  // Левый верхний (x-1, z-1) и (x-1, z) и (x, z-1) и (x, z)
-                {0, 1, -1, 0},   // Правый верхний
-                {0, 1, 0, 1},    // Правый нижний
-                {-1, 0, 0, 1}    // Левый нижний
-        };
-
-        int step = spiralStep % 4;
-        int[] offset = offsets[step];
-
-        // Ставим блок 2x2
-        for (int dx = offset[0]; dx <= offset[1]; dx++) {
-            for (int dz = offset[2]; dz <= offset[3]; dz++) {
-                BlockPos icePos = basePos.offset(dx, 0, dz);
-                if (level().getBlockState(icePos).isAir() || level().getBlockState(icePos).is(Blocks.WATER)) {
-                    level().setBlock(icePos, Blocks.ICE.defaultBlockState(), 3);
-                }
-            }
-        }
-
-        spiralStep++;
     }
 
     private void spawnSnowParticles() {
@@ -173,20 +159,20 @@ public class IceArrowEntity extends AbstractArrow {
 
                     // Превращаем траву в снежную землю
                     if (state.is(Blocks.GRASS_BLOCK)) {
-                        level().setBlock(pos, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
+                        level().setBlock(pos, Blocks.SNOW_BLOCK.defaultBlockState(), 2);
                     }
 
                     // Деревья в ели
                     if (isLog(state)) {
-                        level().setBlock(pos, Blocks.SPRUCE_LOG.defaultBlockState(), 3);
+                        level().setBlock(pos, Blocks.SPRUCE_LOG.defaultBlockState(), 2);
                     }
                     if (isLeaves(state)) {
-                        level().setBlock(pos, Blocks.SPRUCE_LEAVES.defaultBlockState(), 3);
+                        level().setBlock(pos, Blocks.SPRUCE_LEAVES.defaultBlockState(), 2);
                     }
 
                     // Вода в лёд
                     if (state.is(Blocks.WATER)) {
-                        level().setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
+                        level().setBlock(pos, Blocks.ICE.defaultBlockState(), 2);
                     }
                 }
             }
@@ -221,7 +207,7 @@ public class IceArrowEntity extends AbstractArrow {
                     if (Math.random() < 0.8) {
                         BlockPos pos = center.offset(x, y, z);
                         if (!level().getBlockState(pos).is(Blocks.BEDROCK)) {
-                            level().setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
+                            level().setBlock(pos, Blocks.ICE.defaultBlockState(), 2);
                         }
                     }
                 }
