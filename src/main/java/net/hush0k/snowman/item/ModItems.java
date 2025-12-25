@@ -2,6 +2,7 @@ package net.hush0k.snowman.item;
 
 import net.hush0k.snowman.Snowman;
 import net.hush0k.snowman.item.custom.BrickItem;
+import net.hush0k.snowman.item.custom.IceArrowItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -19,6 +20,9 @@ public class ModItems {
     // Кастомный предмет с логикой
     public static final RegistryObject<Item> BRICK = ITEMS.register("brick",
             () -> new BrickItem(new Item.Properties().durability(32)));
+
+    public static final RegistryObject<Item> ICE_ARROW = ITEMS.register("ice_arrow",
+            () -> new IceArrowItem(new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "gss",
+    "sas",
+    "ssg"
+  ],
+  "key": {
+    "g": {
+      "item": "minecraft:gold_ingot"
+    },
+    "s": {
+      "item": "minecraft:snowball"
+    },
+    "a": {
+      "item": "minecraft:arrow"
+    }
+  },
+  "result": {
+    "item": "snowman:ice_arrow",
+    "count": 4
+  }
+}

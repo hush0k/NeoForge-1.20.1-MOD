@@ -2,8 +2,11 @@ package net.hush0k.snowman;
 
 import com.mojang.logging.LogUtils;
 import net.hush0k.snowman.block.ModBlocks;
+import net.hush0k.snowman.entity.ModEntities;
+import net.hush0k.snowman.entity.client.IceArrowRenderer;
 import net.hush0k.snowman.item.ModCreativeModeTabs;
 import net.hush0k.snowman.item.ModItems;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -32,6 +35,7 @@ public class Snowman {
         ModCreativeModeTabs.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModEntities.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -61,6 +65,9 @@ public class Snowman {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                EntityRenderers.register(ModEntities.ICE_ARROW.get(), IceArrowRenderer::new);
+            });
         }
     }
 }

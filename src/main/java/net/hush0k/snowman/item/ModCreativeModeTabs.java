@@ -20,7 +20,8 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.snowman.snowman_items"))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.BRICK.get());
-                        // Добавляй сюда другие предметы
+                        output.accept(ModItems.ICE_ARROW.get());
+
                     })
                     .build());
 
