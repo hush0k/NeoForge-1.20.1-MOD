@@ -1,4 +1,4 @@
-package com.example.examplemod;
+package net.hush0k.snowman;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
