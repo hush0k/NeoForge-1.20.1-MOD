@@ -2,6 +2,7 @@ package net.hush0k.snowman;
 
 import com.mojang.logging.LogUtils;
 import net.hush0k.snowman.block.ModBlocks;
+import net.hush0k.snowman.command.RandomChunkCommand;
 import net.hush0k.snowman.entity.ModEntities;
 import net.hush0k.snowman.entity.client.IceArrowRenderer;
 import net.hush0k.snowman.item.ModCreativeModeTabs;
@@ -11,6 +12,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,6 +34,7 @@ public class Snowman {
 
         modEventBus.addListener(this::commonSetup);
 
+        MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
         ModCreativeModeTabs.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
@@ -45,6 +48,10 @@ public class Snowman {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+    }
+
+    private void registerCommands(RegisterCommandsEvent event) {
+        RandomChunkCommand.register(event.getDispatcher());
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
